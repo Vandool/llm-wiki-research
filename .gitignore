@@ -1,0 +1,33 @@
+# macOS
+.DS_Store
+
+# JetBrains IDE
+.idea/
+
+# Python virtual environment
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Obsidian workspace (keep vault content, drop local UI state)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+
+# Node / build artefacts (Quartz site, tooling)
+node_modules/
+public/
+.npm/
+.wiki-build/
+.git-wiki-tmp/
+
+# Local env files
+.env
+*.local

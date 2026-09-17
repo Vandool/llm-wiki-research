@@ -1,0 +1,14 @@
+# Pipeline without any include
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  script:
+    - echo build
+
+test:
+  stage: test
+  script:
+    - echo test

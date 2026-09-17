@@ -1,0 +1,81 @@
+{
+  "wiki/modules/broken.md": [
+    "L01",
+    "L08"
+  ],
+  "wiki/modules/payments.md": [
+    "L02",
+    "L13"
+  ],
+  "wiki/modules/orders.md": [
+    "L03"
+  ],
+  "wiki/concepts/toolong.md": [
+    "L04"
+  ],
+  "wiki/concepts/secret.md": [
+    "L05",
+    "L14"
+  ],
+  "wiki/concepts/badfm.md": [
+    "L06"
+  ],
+  "wiki/concepts/nosource.md": [
+    "L13"
+  ],
+  "wiki/product/features/tracking.md": [
+    "L07"
+  ],
+  "wiki/index.md": [
+    "L10"
+  ],
+  "wiki/log.md": [
+    "L10"
+  ],
+  "wiki/requests.md": [
+    "L10"
+  ],
+  "wiki/conventions.md": [
+    "L15"
+  ],
+  "wiki/runbooks/restart.md": [
+    "L16"
+  ],
+  "_clean": [
+    "wiki/overview.md",
+    "wiki/glossary.md",
+    "wiki/modules/orders.md",
+    "wiki/concepts/outbox.md",
+    "wiki/howto/deploy.md"
+  ],
+  "_dynamic": {
+    "L09": "bot commit touching instructions.md (constructed by the test)",
+    "L17": "body rewritten without source change (constructed by the test)"
+  },
+  "_all_rules": [
+    "L01",
+    "L02",
+    "L03",
+    "L04",
+    "L05",
+    "L06",
+    "L07",
+    "L08",
+    "L09",
+    "L10",
+    "L12",
+    "L13",
+    "L14",
+    "L15",
+    "L16",
+    "L17"
+  ],
+  "web": [
+    "L12"
+  ],
+  "_config": {
+    "coverage": {
+      "min_files": 2
+    }
+  }
+}

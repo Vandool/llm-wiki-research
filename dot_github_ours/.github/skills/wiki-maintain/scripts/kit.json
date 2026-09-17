@@ -1,0 +1,29 @@
+{
+  "kit_version": "1.0.0",
+  "scaffold": "templates/wiki",
+  "skill_dir": ".github/skills/wiki-maintain",
+  "entrypoints": {
+    "post_commit": "python3 .github/skills/wiki-maintain/scripts/run.py worker --trigger post-commit",
+    "pre_push": "python3 .github/skills/wiki-maintain/scripts/affected.py --check-only --summary",
+    "ci_verify": [
+      "lint.py --all --strict",
+      "backlinks.py --check",
+      "facts.py --check",
+      "index.py --check",
+      "affected.py --check-only"
+    ]
+  },
+  "gitattributes": [
+    "wiki/log.md merge=union",
+    "wiki/log/*.md merge=union",
+    "wiki/index.md gitlab-generated",
+    "wiki/**/index.md gitlab-generated",
+    "wiki/generated/** gitlab-generated",
+    "wiki/.manifest.json gitlab-generated"
+  ],
+  "gitignore": [
+    "public/",
+    ".npm/",
+    ".wiki-build/"
+  ]
+}

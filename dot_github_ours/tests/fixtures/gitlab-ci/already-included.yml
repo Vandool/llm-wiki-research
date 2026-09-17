@@ -1,0 +1,10 @@
+include:
+  - local: .gitlab/ci/wiki.gitlab-ci.yml
+
+stages:
+  - test
+
+test:
+  stage: test
+  script:
+    - echo test

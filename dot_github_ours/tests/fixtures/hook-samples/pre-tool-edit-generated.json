@@ -1,0 +1,1 @@
+{"sessionId": "s1", "timestamp": "2026-09-07T10:00:03Z", "cwd": ".", "toolName": "edit", "toolArgs": {"file_path": "wiki/index.md", "old_string": "a", "new_string": "b"}}

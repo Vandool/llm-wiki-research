@@ -1,0 +1,4 @@
+# wiki-kit
+public/
+.npm/
+.wiki-build/

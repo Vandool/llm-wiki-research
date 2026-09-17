@@ -1,0 +1,7 @@
+# wiki-kit
+wiki/log.md merge=union
+wiki/log/*.md merge=union
+wiki/index.md gitlab-generated
+wiki/**/index.md gitlab-generated
+wiki/generated/** gitlab-generated
+wiki/.manifest.json gitlab-generated

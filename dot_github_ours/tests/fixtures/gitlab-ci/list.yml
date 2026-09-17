@@ -1,0 +1,17 @@
+---
+# Pipeline with a list-form include
+include:
+  - local: .gitlab/ci/lint.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+
+stages:
+  - test
+
+variables:
+  PROD_BRANCH: "production"
+  STAGING_BRANCH: "staging"
+
+test:
+  stage: test
+  script:
+    - echo test

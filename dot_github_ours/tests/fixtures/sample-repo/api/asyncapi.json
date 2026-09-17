@@ -1,0 +1,24 @@
+{
+  "asyncapi": "2.6.0",
+  "info": { "title": "Sample Orders Events", "version": "1.0.0" },
+  "channels": {
+    "orders.placed": {
+      "description": "An order moved from draft to placed.",
+      "publish": { "operationId": "publishOrderPlaced", "summary": "Order placed",
+                    "message": { "name": "OrderPlaced", "payload": { "type": "object",
+                      "properties": { "order_id": { "type": "string" }, "total_cents": { "type": "integer" } } } } }
+    },
+    "orders.paid": {
+      "description": "Payment for an order succeeded.",
+      "publish": { "operationId": "publishOrderPaid", "summary": "Order paid",
+                    "message": { "name": "OrderPaid", "payload": { "type": "object",
+                      "properties": { "order_id": { "type": "string" } } } } }
+    },
+    "orders.payment_declined": {
+      "description": "The provider refused the charge.",
+      "publish": { "operationId": "publishPaymentDeclined", "summary": "Payment declined",
+                    "message": { "name": "PaymentDeclined", "payload": { "type": "object",
+                      "properties": { "order_id": { "type": "string" } } } } }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+# wiki/catalog.yaml — service descriptor (hub-compatible; read by facts.py --seed-catalog and lint L12)
+schema_version: 1
+name: "tools/wiki-kit"
+kind: service
+owner: "@wiki-kit"
+lifecycle: unknown
+provides: []
+consumes: []
+depends_on: []
+stacks: []
+links:
+  repo: ""
+  pages: ""

@@ -1,0 +1,13 @@
+# Sample project pipeline
+stages:
+  - test
+
+variables:
+  BRANCH_PROD: "main"
+  BRANCH_PREPROD: "preprod"
+
+test:
+  stage: test
+  image: python:3.12
+  script:
+    - python -m pytest -q

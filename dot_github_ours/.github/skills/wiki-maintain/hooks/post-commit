@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+# wiki-kit post-commit: start the wiki maintainer in the background. Always exits 0; never blocks the commit.
+# Off switch: WIKI_HOOK_DISABLE=1 or `git config wiki.hook.disable true`. Log: .git/wiki/update.log
+set -u
+root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+cd "$root" || exit 0
+[ "${WIKI_HOOK_DISABLE:-0}" = "1" ] && exit 0
+[ "$(git config --get wiki.hook.disable 2>/dev/null)" = "true" ] && exit 0
+[ "${WIKI_HOOK_RUNNING:-0}" = "1" ] && exit 0                                   # guard 1: our own follow-up commit
+git log -1 --format=%B 2>/dev/null | grep -q '^Wiki-Update: auto' && exit 0     # guard 2: trailer
+[ -d .git/rebase-merge ] || [ -d .git/rebase-apply ] && exit 0                  # never mid-rebase
+WIKI_DIR="${WIKI_DIR:-$(git config --get wiki.dir 2>/dev/null || echo wiki)}"
+[ -f "$WIKI_DIR/.manifest.json" ] || exit 0                                     # not bootstrapped: /wiki-init first
+changed=$(git diff-tree --no-commit-id --name-only -r HEAD 2>/dev/null)         # empty for merge commits (CI covers them)
+[ -z "$changed" ] && exit 0
+printf '%s\n' "$changed" | grep -qv "^$WIKI_DIR/" || exit 0                     # guard 3: wiki-only commit
+py=""; for c in python3 python; do command -v "$c" >/dev/null 2>&1 && { py=$c; break; }; done
+[ -z "$py" ] && command -v py >/dev/null 2>&1 && py="py -3"
+[ -n "$py" ] || { echo "wiki: python not found; CI will report staleness" >&2; exit 0; }
+gitdir=$(git rev-parse --git-dir); mkdir -p "$gitdir/wiki"                    # guard 4 (lock) lives in run.py, pid-aware
+branch=$(git symbolic-ref --short -q HEAD || echo "")
+( WIKI_HOOK_RUNNING=1 WIKI_TRIGGER=post-commit WIKI_BRANCH="$branch" WIKI_HEAD="$(git rev-parse HEAD)" \
+  COPILOT_AUTO_UPDATE=false \
+  nohup $py .github/skills/wiki-maintain/scripts/run.py worker --trigger post-commit </dev/null >>"$gitdir/wiki/update.log" 2>&1 & )
+echo "wiki: maintainer started in the background (log: $gitdir/wiki/update.log)" >&2
+exit 0

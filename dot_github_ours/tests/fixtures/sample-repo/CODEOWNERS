@@ -1,0 +1,6 @@
+# Sample CODEOWNERS
+*            @sample/platform
+src/orders/  @sample/orders-team
+src/payments/ @sample/payments-team
+web/         @sample/web-team
+docs/adr/    @sample/architects

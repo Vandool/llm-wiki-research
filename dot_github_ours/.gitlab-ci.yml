@@ -1,0 +1,19 @@
+# Pipeline of the wiki-kit repository itself (dogfood): the kit's own wiki is verified and published
+# with the very include that targets receive, pointed at the template copies instead of .gitlab/.
+include:
+  - local: templates/ci/wiki.gitlab-ci.yml
+
+variables:
+  WIKI_SITE_DIR: "templates/quartz"       # targets use .gitlab/wiki-site; the kit keeps the templates in place
+
+stages:
+  - test
+
+kit:tests:
+  stage: test
+  image: python:3.12
+  script:
+    - python3 -m unittest discover -s tests -v
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

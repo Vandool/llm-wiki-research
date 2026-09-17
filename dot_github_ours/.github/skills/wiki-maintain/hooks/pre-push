@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+# wiki-kit pre-push: deterministic staleness report (no model). Blocks the push only in strict mode.
+# Strict: WIKI_STRICT=1 or `git config wiki.strict true`. Off switch: WIKI_HOOK_DISABLE=1 or `git config wiki.hook.disable true`.
+set -u
+root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+cd "$root" || exit 0
+cat >/dev/null                                                                  # consume the ref list git pipes in
+[ "${WIKI_HOOK_DISABLE:-0}" = "1" ] && exit 0
+[ "$(git config --get wiki.hook.disable 2>/dev/null)" = "true" ] && exit 0
+[ "${WIKI_HOOK_RUNNING:-0}" = "1" ] && exit 0                                   # our own worker pushing (branch-and-mr)
+WIKI_DIR="${WIKI_DIR:-$(git config --get wiki.dir 2>/dev/null || echo wiki)}"
+[ -f "$WIKI_DIR/.manifest.json" ] || exit 0                                     # not bootstrapped: nothing to compare
+[ -f .github/skills/wiki-maintain/scripts/affected.py ] || exit 0
+strict=0
+[ "${WIKI_STRICT:-0}" = "1" ] && strict=1
+[ "$(git config --get wiki.strict 2>/dev/null)" = "true" ] && strict=1
+py=""; for c in python3 python; do command -v "$c" >/dev/null 2>&1 && { py=$c; break; }; done
+[ -z "$py" ] && command -v py >/dev/null 2>&1 && py="py -3"
+[ -n "$py" ] || exit 0
+$py .github/skills/wiki-maintain/scripts/affected.py --check-only --summary
+rc=$?
+if [ "$rc" -eq 1 ]; then
+  echo "wiki: stale pages listed above. Run 'copilot' then '/wiki-update' (CI wiki:verify will flag this too)." >&2
+  [ "$strict" -eq 1 ] && exit 1
+fi
+exit 0

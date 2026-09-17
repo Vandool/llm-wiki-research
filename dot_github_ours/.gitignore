@@ -1,0 +1,10 @@
+# wiki-kit
+public/
+.npm/
+.wiki-build/
+# python
+__pycache__/
+*.pyc
+.pytest_cache/
+# local
+.git-wiki-tmp/

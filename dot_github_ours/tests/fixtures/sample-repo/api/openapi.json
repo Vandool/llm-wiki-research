@@ -1,0 +1,27 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "Sample Orders API", "version": "1.0.0" },
+  "paths": {
+    "/v1/orders/": {
+      "post": { "tags": ["orders"], "operationId": "create_order", "summary": "Create an order",
+                 "responses": { "200": { "description": "Created" } } }
+    },
+    "/v1/orders/{order_id}": {
+      "get": { "tags": ["orders"], "operationId": "get_order", "summary": "Fetch an order",
+                "parameters": [ { "name": "order_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+                "responses": { "200": { "description": "OK" }, "404": { "description": "Not found" } } }
+    },
+    "/v1/orders/{order_id}/place": {
+      "post": { "tags": ["orders"], "operationId": "place_order", "summary": "Place an order",
+                 "responses": { "200": { "description": "OK" } } }
+    },
+    "/v1/orders/{order_id}/pay": {
+      "post": { "tags": ["orders"], "operationId": "pay_order", "summary": "Pay an order",
+                 "responses": { "200": { "description": "OK" }, "402": { "description": "Declined" } } }
+    },
+    "/v1/payments/methods": {
+      "get": { "tags": ["payments"], "operationId": "list_methods", "summary": "List payment methods",
+                "responses": { "200": { "description": "OK" } } }
+    }
+  }
+}

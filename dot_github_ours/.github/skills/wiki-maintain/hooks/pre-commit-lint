@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+# wiki-kit pre-commit-lint: fast deterministic lint of the staged wiki files (no model). Non-zero blocks the commit.
+# Off switch: WIKI_HOOK_DISABLE=1 or `git config wiki.hook.disable true`.
+set -u
+root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+cd "$root" || exit 0
+[ "${WIKI_HOOK_DISABLE:-0}" = "1" ] && exit 0
+[ "$(git config --get wiki.hook.disable 2>/dev/null)" = "true" ] && exit 0
+[ "${WIKI_HOOK_RUNNING:-0}" = "1" ] && exit 0                                   # the worker already linted
+[ -f .github/skills/wiki-maintain/scripts/lint.py ] || exit 0
+WIKI_DIR="${WIKI_DIR:-$(git config --get wiki.dir 2>/dev/null || echo wiki)}"
+git diff --cached --name-only --diff-filter=ACMR -- "$WIKI_DIR" 2>/dev/null | grep -q . || exit 0
+py=""; for c in python3 python; do command -v "$c" >/dev/null 2>&1 && { py=$c; break; }; done
+[ -z "$py" ] && command -v py >/dev/null 2>&1 && py="py -3"
+[ -n "$py" ] || exit 0
+exec $py .github/skills/wiki-maintain/scripts/lint.py --staged

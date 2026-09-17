@@ -1,0 +1,53 @@
+# wiki-kit hooks for the pre-commit framework (https://pre-commit.com).
+# Use in a target repository's .pre-commit-config.yaml:
+#
+#   default_install_hook_types: [pre-commit, post-commit, pre-push]
+#   repos:
+#     - repo: local            # the kit files are committed inside the repository by install.py
+#       hooks:
+#         - id: wiki-post-commit
+#           name: wiki update (background, Copilot CLI)
+#           entry: .github/skills/wiki-maintain/hooks/post-commit
+#           language: script
+#           always_run: true
+#           pass_filenames: false
+#           stages: [post-commit]
+#         - id: wiki-pre-push
+#           name: wiki staleness check
+#           entry: .github/skills/wiki-maintain/hooks/pre-push
+#           language: script
+#           always_run: true
+#           pass_filenames: false
+#           stages: [pre-push]
+#         - id: wiki-lint
+#           name: wiki lint (staged pages)
+#           entry: .github/skills/wiki-maintain/hooks/pre-commit-lint
+#           language: script
+#           pass_filenames: false
+#           files: ^wiki/
+#
+# then: pre-commit install --hook-type pre-commit --hook-type post-commit --hook-type pre-push
+#
+# Or reference this kit repository directly (`repo: <kit git url>`, `rev: v1.0.0`) with the ids below.
+- id: wiki-post-commit
+  name: wiki update (background, Copilot CLI)
+  entry: .github/skills/wiki-maintain/hooks/post-commit
+  language: script
+  always_run: true
+  pass_filenames: false
+  stages: [post-commit]
+- id: wiki-pre-push
+  name: wiki staleness check
+  entry: .github/skills/wiki-maintain/hooks/pre-push
+  language: script
+  always_run: true
+  pass_filenames: false
+  stages: [pre-push]
+- id: wiki-lint
+  name: wiki lint (staged pages)
+  entry: .github/skills/wiki-maintain/hooks/pre-commit-lint
+  language: script
+  always_run: true
+  pass_filenames: false
+  files: ^wiki/
+  stages: [pre-commit]

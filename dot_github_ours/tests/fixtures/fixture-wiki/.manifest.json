@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "repo": "group/sample",
+  "checkpoint_commit": null,
+  "checkpoint_at": "2026-09-01T09:00:00Z",
+  "last_run": null,
+  "generated": {},
+  "pages": {
+    "modules/orders.md": {
+      "type": "Module",
+      "owner": "agent",
+      "page_hash": "sha256:x",
+      "body_hash": "sha256:x",
+      "last_verified_commit": "0000000000000000000000000000000000000000",
+      "verified_at": "2026-09-01T09:00:00Z",
+      "run_id": null,
+      "generated_by": "copilot-cli/gpt-5-mini",
+      "status": "stable",
+      "stale_after": null,
+      "sources": [
+        {
+          "id": "service",
+          "resource": "repo://src/orders/service.py::OrderService.place",
+          "path": "src/orders/service.py",
+          "blob_sha": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+          "line_range": null,
+          "line_hash": null,
+          "symbol": "OrderService.place",
+          "symbol_hash": "sha256:stale",
+          "hashable": true,
+          "kind": "file"
+        },
+        {
+          "id": "api",
+          "resource": "repo://src/orders/api.py",
+          "path": "src/orders/api.py",
+          "blob_sha": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+          "line_range": null,
+          "line_hash": null,
+          "symbol": null,
+          "symbol_hash": null,
+          "hashable": true,
+          "kind": "file"
+        }
+      ]
+    }
+  }
+}

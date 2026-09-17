@@ -1,0 +1,164 @@
+# .gitlab/ci/wiki.gitlab-ci.yml — Wiki-Kit: 1.0.0 (installed by install.py; only the PROJECT SETTINGS block is yours)
+#
+# Add to .gitlab-ci.yml:
+#   include:
+#     - local: .gitlab/ci/wiki.gitlab-ci.yml
+#
+# Jobs: wiki:verify (deterministic checks on every MR and protected branch)
+#       wiki:pages (site root, production branch) · wiki:pages:staging (/staging, optional)
+#       wiki:pages:preview (/<branch-slug>, expires; needs parallel deployments = Premium/Ultimate)
+# Requires GitLab >= 17.9 as written ($WIKI_DEV_EXPIRE_IN as a variable: 17.11). Older: docs/OPERATIONS.md.
+# Every WIKI_* setting can be overridden as a project CI/CD variable (UI) without editing this file.
+
+variables:
+  # ---- PROJECT SETTINGS (literals only; `ci_integrate.py apply` rewrites this block) ----
+  WIKI_PROD_BRANCH: ""                  # "" = $CI_DEFAULT_BRANCH; otherwise a literal branch name, e.g. "prod"
+  WIKI_STAGING_BRANCH: ""               # literal branch published under /staging; "" = off (needs parallel deployments)
+  WIKI_PUBLISH: "true"                  # "false": verify only, never build or deploy the site
+  WIKI_PARALLEL_DEPLOYMENTS: "false"    # "true" only on Premium/Ultimate >= 17.9 (pages.path_prefix)
+  WIKI_DEV_PREVIEWS: "true"             # per-branch previews; effective only with WIKI_PARALLEL_DEPLOYMENTS="true"
+  WIKI_DEV_EXPIRE_IN: "1 week"          # lifetime of a preview deployment
+  WIKI_VERIFY_SOFT: "false"             # "true": wiki:verify warns instead of failing (rollout period)
+  # ---- TOOLCHAIN (bumped by install.py --upgrade) ----
+  WIKI_DIR: "wiki"
+  WIKI_SITE_DIR: ".gitlab/wiki-site"
+  WIKI_BUILD_DIR: ".wiki-build"         # must match the cache path below
+  WIKI_NODE_IMAGE: "node:22-bookworm"   # Quartz v5 needs Node >= 22
+  WIKI_PYTHON_IMAGE: "python:3.12"      # not -slim: the scripts call git
+  WIKI_QUARTZ_REPO: "https://github.com/jackyzha0/quartz.git"
+  WIKI_QUARTZ_REF: "v5.0.0"             # tag, branch or full SHA; keep in sync with .gitlab/wiki-site/quartz.lock.json
+  WIKI_CONCURRENCY: "2"
+
+# Rebuild the site only when wiki content or the publishing setup changes.
+.wiki_changes: &wiki_changes
+  - "wiki/**/*"
+  - ".gitlab/ci/wiki.gitlab-ci.yml"
+  - ".gitlab/wiki-site/**/*"
+
+.wiki_base:
+  stage: .post                          # exists in every pipeline; needs: [] starts the job immediately anyway
+  needs: []
+  interruptible: true
+  retry:
+    max: 2
+    when: [runner_system_failure, stuck_or_timeout_failure, api_failure]
+  variables:
+    GIT_DEPTH: "0"                      # full history: changelog/date generators and the manifest checkpoint need it
+
+wiki:verify:
+  extends: .wiki_base
+  image: $WIKI_PYTHON_IMAGE
+  script:
+    - test -f .github/skills/wiki-maintain/scripts/lint.py || { echo "wiki-kit scripts missing: run install.py"; exit 1; }
+    - python3 .github/skills/wiki-maintain/scripts/lint.py --all --strict
+    - python3 .github/skills/wiki-maintain/scripts/backlinks.py --check
+    - python3 .github/skills/wiki-maintain/scripts/facts.py --check
+    - python3 .github/skills/wiki-maintain/scripts/index.py --check
+    - python3 .github/skills/wiki-maintain/scripts/affected.py --check-only
+  after_script:
+    - |
+      if [ "$CI_JOB_STATUS" = "failed" ]; then
+        echo "------------------------------------------------------------------"
+        echo "wiki:verify FAILED: the wiki is stale or invalid for this change."
+        echo "Fix locally: run 'copilot', then '/wiki-update'; commit wiki/; push."
+        echo "Without Copilot: python3 .github/skills/wiki-maintain/scripts/run.py worker --foreground --no-model"
+        echo "------------------------------------------------------------------"
+      fi
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $WIKI_VERIFY_SOFT == "true"
+      allow_failure: true
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $WIKI_PROD_BRANCH != "" && $CI_COMMIT_BRANCH == $WIKI_PROD_BRANCH
+    - if: $WIKI_STAGING_BRANCH != "" && $CI_COMMIT_BRANCH == $WIKI_STAGING_BRANCH
+
+.wiki_pages:
+  extends: .wiki_base
+  image: $WIKI_NODE_IMAGE
+  variables:
+    npm_config_cache: "$CI_PROJECT_DIR/.npm"
+    WIKI_PAGES_PREFIX: ""
+  cache:
+    - key: "wiki-npm-$WIKI_QUARTZ_REF"
+      paths: [.npm/]
+    - key: "wiki-quartz-plugins-$WIKI_QUARTZ_REF"
+      paths: [.wiki-build/.quartz/plugins/]
+  before_script:
+    - |
+      # baseUrl/baseDir of this deployment. CI_PAGES_URL contains the path_prefix on GitLab >= 17.9;
+      # older versions omit it, so the prefix is appended when missing (correct on both).
+      url="${CI_PAGES_URL#*://}"; url="${url%/}"
+      if [ -n "$WIKI_PAGES_PREFIX" ]; then case "$url" in */"$WIKI_PAGES_PREFIX") ;; *) url="$url/$WIKI_PAGES_PREFIX" ;; esac; fi
+      export WIKI_BASE_URL="$url"
+      case "$url" in */*) export WIKI_BASE_DIR="/${url#*/}" ;; *) export WIKI_BASE_DIR="/" ;; esac
+      echo "wiki-site: baseUrl=$WIKI_BASE_URL baseDir=$WIKI_BASE_DIR quartz=$WIKI_QUARTZ_REF"
+  script:
+    - bash "$WIKI_SITE_DIR/build.sh"
+  artifacts:
+    paths: [public]
+    expire_in: 1 week
+
+wiki:pages:
+  extends: .wiki_pages
+  resource_group: wiki-pages-production
+  environment:
+    name: wiki/production
+    url: $CI_PAGES_URL
+  pages:
+    publish: public
+  rules:
+    - if: $WIKI_PUBLISH != "true"
+      when: never
+    - if: $WIKI_PROD_BRANCH == "" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes: *wiki_changes
+    - if: $WIKI_PROD_BRANCH != "" && $CI_COMMIT_BRANCH == $WIKI_PROD_BRANCH
+      changes: *wiki_changes
+    - if: $WIKI_PROD_BRANCH == "" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+      allow_failure: true
+    - if: $WIKI_PROD_BRANCH != "" && $CI_COMMIT_BRANCH == $WIKI_PROD_BRANCH
+      when: manual
+      allow_failure: true
+
+wiki:pages:staging:
+  extends: .wiki_pages
+  environment:
+    name: wiki/staging
+    url: $CI_PAGES_URL
+  variables:
+    WIKI_PAGES_PREFIX: "staging"
+  pages:
+    publish: public
+    path_prefix: "$WIKI_PAGES_PREFIX"
+    expire_in: never                    # parallel deployments expire after 24 h unless told otherwise
+  rules:
+    - if: $WIKI_PUBLISH != "true" || $WIKI_PARALLEL_DEPLOYMENTS != "true" || $WIKI_STAGING_BRANCH == ""
+      when: never
+    - if: $CI_COMMIT_BRANCH == $WIKI_STAGING_BRANCH
+      changes: *wiki_changes
+
+wiki:pages:preview:
+  extends: .wiki_pages
+  environment:
+    name: wiki/preview/$CI_COMMIT_REF_SLUG
+    url: $CI_PAGES_URL
+    deployment_tier: development
+  variables:
+    WIKI_PAGES_PREFIX: "$CI_COMMIT_REF_SLUG"
+  pages:
+    publish: public
+    path_prefix: "$WIKI_PAGES_PREFIX"
+    expire_in: "$WIKI_DEV_EXPIRE_IN"    # variable form needs GitLab >= 17.11; older: write a literal here
+  rules:
+    - if: $WIKI_PUBLISH != "true" || $WIKI_PARALLEL_DEPLOYMENTS != "true" || $WIKI_DEV_PREVIEWS != "true"
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: never
+    - if: $WIKI_PROD_BRANCH != "" && $CI_COMMIT_BRANCH == $WIKI_PROD_BRANCH
+      when: never
+    - if: $WIKI_STAGING_BRANCH != "" && $CI_COMMIT_BRANCH == $WIKI_STAGING_BRANCH
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes: *wiki_changes
+    - if: $CI_COMMIT_BRANCH
+      changes: *wiki_changes

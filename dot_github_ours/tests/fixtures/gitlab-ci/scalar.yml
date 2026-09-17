@@ -1,0 +1,9 @@
+include: .gitlab/ci/lint.yml
+
+stages:
+  - test
+
+test:
+  stage: test
+  script:
+    - echo test

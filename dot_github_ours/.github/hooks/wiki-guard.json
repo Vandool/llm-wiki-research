@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      { "type": "command",
+        "bash": "cd \"$(git rev-parse --show-toplevel)\" && python3 .github/skills/wiki-maintain/scripts/hook_guard.py session-start",
+        "powershell": "Set-Location (git rev-parse --show-toplevel); python .github/skills/wiki-maintain/scripts/hook_guard.py session-start",
+        "timeoutSec": 15 }
+    ],
+    "preToolUse": [
+      { "type": "command",
+        "bash": "cd \"$(git rev-parse --show-toplevel)\" && python3 .github/skills/wiki-maintain/scripts/hook_guard.py pre-tool",
+        "powershell": "Set-Location (git rev-parse --show-toplevel); python .github/skills/wiki-maintain/scripts/hook_guard.py pre-tool",
+        "timeoutSec": 10 }
+    ],
+    "postToolUse": [
+      { "type": "command",
+        "bash": "cd \"$(git rev-parse --show-toplevel)\" && python3 .github/skills/wiki-maintain/scripts/hook_guard.py post-tool",
+        "powershell": "Set-Location (git rev-parse --show-toplevel); python .github/skills/wiki-maintain/scripts/hook_guard.py post-tool",
+        "timeoutSec": 30 }
+    ],
+    "agentStop": [
+      { "type": "command",
+        "bash": "cd \"$(git rev-parse --show-toplevel)\" && python3 .github/skills/wiki-maintain/scripts/stop_gate.py",
+        "powershell": "Set-Location (git rev-parse --show-toplevel); python .github/skills/wiki-maintain/scripts/stop_gate.py",
+        "timeoutSec": 120 }
+    ]
+  }
+}

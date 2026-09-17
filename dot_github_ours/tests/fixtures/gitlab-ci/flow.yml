@@ -1,0 +1,9 @@
+include: [{local: ".gitlab/ci/lint.yml"}, {template: "Security/Secret-Detection.gitlab-ci.yml"}]
+
+stages:
+  - test
+
+test:
+  stage: test
+  script:
+    - echo test

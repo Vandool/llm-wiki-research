@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "kit": {
+    "version": "1.0.0",
+    "installed_at": "2026-09-07T17:36:10Z",
+    "ci_include_form": "list",
+    "files": {}
+  },
+  "wiki_dir": "wiki",
+  "repo": {
+    "slug": "tools/wiki-kit",
+    "id_prefix": "wiki-kit",
+    "gitlab_url": "",
+    "default_branch": "main",
+    "team": "@wiki-kit"
+  },
+  "language": "en",
+  "models": {
+    "bootstrap": "claude-sonnet-4.6",
+    "incremental": "gpt-5-mini"
+  },
+  "copilot": {
+    "bin": null
+  },
+  "max_pages": 8,
+  "budgets": {
+    "max_source_bytes_per_run": 200000,
+    "max_source_bytes_per_cluster": 120000,
+    "max_pages_per_cluster": 6,
+    "max_excerpt_lines": 120,
+    "max_excerpt_lines_per_run": 800,
+    "read_max_bytes": 65536,
+    "run_timeout_s": 1200,
+    "bootstrap_timeout_s": 1800,
+    "max_requests_per_run": 5,
+    "max_request_chars": 500,
+    "debounce_s": 120,
+    "lock_ttl_min": 60,
+    "lint_sample_pages": 10,
+    "session_context_kb": 30,
+    "max_lines": {
+      "Overview": 150,
+      "Architecture": 200,
+      "Module": 200,
+      "Concept": 120,
+      "How-to": 120,
+      "Contract": 400,
+      "Contract Guide": 150,
+      "Runbook": 150,
+      "Glossary": 300,
+      "Feature": 80,
+      "Capability Map": 150,
+      "Release Notes": 200,
+      "What Changed": 60,
+      "Analysis": 200,
+      "Generated": 400,
+      "Conventions": 150,
+      "Requests": 400,
+      "Instructions": 300
+    },
+    "index_root_lines": 120,
+    "index_folder_lines": 200,
+    "log_entries": 200
+  },
+  "sources": {
+    "include": [
+      ".github/skills/wiki-maintain/scripts",
+      "templates",
+      "tests"
+    ],
+    "exclude": [
+      "**/node_modules/**",
+      "**/.venv/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/*.min.js",
+      "**/vendor/**",
+      "**/__snapshots__/**",
+      "**/*.lock"
+    ]
+  },
+  "coverage": {
+    "depth": 2,
+    "min_files": 3,
+    "ignore_tests": true
+  },
+  "api_spec": {
+    "openapi": [],
+    "asyncapi": [],
+    "export_hint": ""
+  },
+  "branches": {
+    "production": "",
+    "staging": "",
+    "dev_previews": true,
+    "parallel_deployments": false,
+    "dev_expire_in": "1 week",
+    "skip_runs_on": [
+      "renovate/*",
+      "release/*"
+    ]
+  },
+  "pages": {
+    "enabled": true,
+    "site_title": "Wiki-Kit wiki",
+    "access": "members"
+  },
+  "commit_policy": "commit",
+  "isolation": "in-place",
+  "po_layer": false,
+  "po": {
+    "reviewers": [],
+    "max_sentence_words": 25,
+    "forbidden_words": [
+      "endpoint",
+      "repository",
+      "MR",
+      "merge request",
+      "JSON",
+      "null",
+      "exception",
+      "refactor",
+      "schema",
+      "payload",
+      "identifier",
+      "identifiers",
+      "stack trace",
+      "commit"
+    ]
+  },
+  "stacks": [],
+  "hooks": {
+    "write_tools": [
+      "edit",
+      "write",
+      "create",
+      "multi_edit",
+      "apply_patch",
+      "str_replace_editor"
+    ],
+    "shell_tools": [
+      "shell",
+      "bash",
+      "execute",
+      "run_in_terminal"
+    ],
+    "read_tools": [
+      "read",
+      "view"
+    ],
+    "unknown_tool": "pass"
+  },
+  "secrets_denylist": [],
+  "_comment": "Dogfood config for the kit repository itself. Targets get their own file from install.py + /wiki-init."
+}
